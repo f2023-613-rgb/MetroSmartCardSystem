@@ -35,7 +35,7 @@ run: $(TARGET)
 	./$(TARGET)
 
 commands: $(TARGET)
-	./$(TARGET) data/commands.txt
+	./$(TARGET) --script data/commands.txt
 
 performance:
 	$(CXX) $(CXXFLAGS) \

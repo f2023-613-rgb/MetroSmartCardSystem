@@ -1,6 +1,7 @@
 #include <iostream>
 #include <limits>
 #include <chrono>
+#include <string>
 
 #include "../include/MetroSystem.h"
 #include "../include/CommandProcessor.h"
@@ -112,28 +113,42 @@ int main(int argc, char* argv[])
             << "Starting with empty journeys.\n";
     }
 
-    if (argc > 1)
+if (argc > 1)
 {
-    std::cout
-        << "\nRunning command-file mode.\n";
-
-    CommandProcessor processor(system);
-
-    bool success =
-        processor.processFile(argv[1]);
-
-    system.saveCards(
-        "data/cards.csv");
-
-    system.saveJourneys(
-        "data/journeys.csv");
-
-    if (!success)
+    if (argc == 3 &&
+        std::string(argv[1]) == "--script")
     {
-        return 1;
+        std::cout
+            << "\nRunning command-file mode.\n";
+
+        CommandProcessor processor(system);
+
+        bool success =
+            processor.processFile(argv[2]);
+
+        system.saveCards(
+            "data/cards.csv");
+
+        system.saveJourneys(
+            "data/journeys.csv");
+
+        if (!success)
+        {
+            return 1;
+        }
+
+        return 0;
     }
 
-    return 0;
+    std::cout
+        << "Invalid command-line arguments.\n";
+
+    std::cout
+        << "Usage:\n"
+        << "  metro\n"
+        << "  metro --script <command-file>\n";
+
+    return 1;
 }
 
     std::cout
