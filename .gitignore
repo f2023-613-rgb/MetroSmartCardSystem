@@ -1,0 +1,18 @@
+# Compiled program
+metro.exe
+metro
+
+# Object files
+*.o
+*.obj
+
+# Debug/build files
+*.out
+*.exe
+
+# VS Code local settings
+.vscode/
+
+# Temporary files
+*.tmp
+*.log
