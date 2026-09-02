@@ -2,6 +2,7 @@
 #include "../include/Card.h"
 #include "../include/Journey.h"
 #include "../include/Station.h"
+#include "../include/OperationCounter.h"
 
 int main()
 {
@@ -42,6 +43,17 @@ int main()
     std::cout << "Station ID: " << station.getStationId() << '\n';
     std::cout << "Station Code: " << station.getStationCode() << '\n';
     std::cout << "Station Name: " << station.getStationName() << '\n';
+
+    OperationCounter counter;
+
+    counter.incrementSteps();
+    counter.incrementSteps();
+
+    counter.incrementComparisons();
+
+    std::cout << "\n=== COUNTER TEST ===\n";
+    std::cout << "Steps: " << counter.getSteps() << '\n';
+    std::cout << "Comparisons: " << counter.getComparisons() << '\n';
 
     return 0;
 }
