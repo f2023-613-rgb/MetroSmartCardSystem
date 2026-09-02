@@ -1,4 +1,7 @@
 #include "../include/MetroSystem.h"
+#include <fstream>
+#include <sstream>
+#include <string>
 
 const double MetroSystem::MINIMUM_BALANCE = 50.0;
 
@@ -635,6 +638,218 @@ bool MetroSystem::moveJourneyToLast(
         .moveToLast();
 
     counter.incrementSteps();
+
+    return true;
+}
+
+bool MetroSystem::saveCards(
+    const char* filename) const
+{
+    return cards.saveCards(filename);
+}
+
+bool MetroSystem::saveJourneys(
+    const char* filename) const
+{
+    return cards.saveJourneys(filename);
+}
+
+bool MetroSystem::loadCards(
+    const char* filename)
+{
+    std::ifstream input(filename);
+
+    if (!input.is_open())
+    {
+        return false;
+    }
+
+    std::string line;
+
+    // Skip header
+    std::getline(input, line);
+
+    while (std::getline(input, line))
+    {
+        if (line.empty())
+        {
+            continue;
+        }
+
+        std::stringstream stream(line);
+
+        std::string cardNumberText;
+        std::string holderName;
+        std::string cnic;
+        std::string balanceText;
+        std::string blockedText;
+        std::string activeText;
+        std::string openJourneyText;
+        std::string entryStationText;
+        std::string entryTime;
+
+        std::getline(stream, cardNumberText, ',');
+        std::getline(stream, holderName, ',');
+        std::getline(stream, cnic, ',');
+        std::getline(stream, balanceText, ',');
+        std::getline(stream, blockedText, ',');
+        std::getline(stream, activeText, ',');
+        std::getline(stream, openJourneyText, ',');
+        std::getline(stream, entryStationText, ',');
+        std::getline(stream, entryTime);
+
+        try
+        {
+            long long cardNumber =
+                std::stoll(cardNumberText);
+
+            double balance =
+                std::stod(balanceText);
+
+            bool blocked =
+                (std::stoi(blockedText) != 0);
+
+            bool active =
+                (std::stoi(activeText) != 0);
+
+            bool openJourney =
+                (std::stoi(openJourneyText) != 0);
+
+            int entryStation =
+                std::stoi(entryStationText);
+
+            Card card;
+
+            card.setCardNumber(cardNumber);
+            card.setHolderName(holderName.c_str());
+            card.setCNIC(cnic.c_str());
+            card.setBalance(balance);
+            card.setBlocked(blocked);
+            card.setActive(active);
+
+            if (openJourney)
+            {
+                card.openNewJourney(
+                    entryStation,
+                    entryTime.c_str());
+            }
+
+            OperationCounter counter;
+
+            if (!cards.insert(
+                    card,
+                    counter))
+            {
+                continue;
+            }
+
+            if (blocked)
+            {
+                OperationCounter blockCounter;
+
+                blockedCards.blockCard(
+                    cardNumber,
+                    blockCounter);
+            }
+        }
+        catch (...)
+        {
+            // Invalid record: skip it safely.
+            continue;
+        }
+    }
+
+    input.close();
+
+    return true;
+}
+
+bool MetroSystem::loadJourneys(
+    const char* filename)
+{
+    std::ifstream input(filename);
+
+    if (!input.is_open())
+    {
+        return false;
+    }
+
+    std::string line;
+
+    // Skip header
+    std::getline(input, line);
+
+    while (std::getline(input, line))
+    {
+        if (line.empty())
+        {
+            continue;
+        }
+
+        std::stringstream stream(line);
+
+        std::string cardNumberText;
+        std::string entryStationText;
+        std::string exitStationText;
+        std::string entryTime;
+        std::string exitTime;
+        std::string fareText;
+
+        std::getline(stream, cardNumberText, ',');
+        std::getline(stream, entryStationText, ',');
+        std::getline(stream, exitStationText, ',');
+        std::getline(stream, entryTime, ',');
+        std::getline(stream, exitTime, ',');
+        std::getline(stream, fareText);
+
+        try
+        {
+            long long cardNumber =
+                std::stoll(cardNumberText);
+
+            int entryStation =
+                std::stoi(entryStationText);
+
+            int exitStation =
+                std::stoi(exitStationText);
+
+            double fare =
+                std::stod(fareText);
+
+            OperationCounter searchCounter;
+
+            Card* card =
+                cards.search(
+                    cardNumber,
+                    searchCounter);
+
+            if (card == nullptr)
+            {
+                continue;
+            }
+
+            Journey journey;
+
+            journey.setEntryStation(entryStation);
+            journey.setExitStation(exitStation);
+            journey.setEntryTime(entryTime.c_str());
+            journey.setExitTime(exitTime.c_str());
+            journey.setFare(fare);
+
+            OperationCounter historyCounter;
+
+            card->getJourneyHistory()
+                .addJourney(
+                    journey,
+                    historyCounter);
+        }
+        catch (...)
+        {
+            continue;
+        }
+    }
+
+    input.close();
 
     return true;
 }

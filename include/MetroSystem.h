@@ -109,6 +109,14 @@ bool moveJourneyToFirst(
 bool moveJourneyToLast(
     long long cardNumber,
     OperationCounter& counter);
+
+bool loadCards(const char* filename);
+
+bool loadJourneys(const char* filename);
+
+bool saveCards(const char* filename) const;
+
+bool saveJourneys(const char* filename) const;
 };
 
 #endif

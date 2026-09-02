@@ -384,3 +384,24 @@ void JourneyHistory::copyFrom(
 
     current = copiedCurrent;
 }
+
+void JourneyHistory::writeCSV(
+    std::ostream& output,
+    long long cardNumber) const
+{
+    JourneyNode* node = head;
+
+    while (node != nullptr)
+    {
+        output
+            << cardNumber << ','
+            << node->data.getEntryStation() << ','
+            << node->data.getExitStation() << ','
+            << node->data.getEntryTime() << ','
+            << node->data.getExitTime() << ','
+            << node->data.getFare()
+            << '\n';
+
+        node = node->next;
+    }
+}

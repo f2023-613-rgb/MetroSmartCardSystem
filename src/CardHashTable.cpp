@@ -1,4 +1,6 @@
 #include "../include/CardHashTable.h"
+#include <fstream>
+#include <iomanip>
 
 CardHashTable::HashNode::HashNode(const Card& card)
 {
@@ -390,4 +392,94 @@ void CardHashTable::rehash(int newCapacity)
     }
 
     delete[] oldBuckets;
+}
+
+bool CardHashTable::saveCards(
+    const char* filename) const
+{
+    std::ofstream output(filename);
+
+    if (!output.is_open())
+    {
+        return false;
+    }
+
+    output
+        << "cardNumber,holderName,cnic,balance,"
+        << "blocked,active,openJourney,"
+        << "entryStation,entryTime\n";
+
+    output << std::fixed << std::setprecision(2);
+
+    for (int i = 0; i < capacity; i++)
+    {
+        HashNode* current =
+            buckets[i];
+
+        while (current != nullptr)
+        {
+            const Card& card =
+                current->data;
+
+            output
+                << card.getCardNumber() << ','
+                << card.getHolderName() << ','
+                << card.getCNIC() << ','
+                << card.getBalance() << ','
+                << (card.isBlocked() ? 1 : 0) << ','
+                << (card.isActive() ? 1 : 0) << ','
+                << (card.hasOpenJourney() ? 1 : 0) << ','
+                << card.getEntryStation() << ','
+                << card.getEntryTime()
+                << '\n';
+
+            current =
+                current->next;
+        }
+    }
+
+    output.close();
+
+    return true;
+}
+
+bool CardHashTable::saveJourneys(
+    const char* filename) const
+{
+    std::ofstream output(filename);
+
+    if (!output.is_open())
+    {
+        return false;
+    }
+
+    output
+        << "cardNumber,entryStation,exitStation,"
+        << "entryTime,exitTime,fare\n";
+
+    output << std::fixed << std::setprecision(2);
+
+    for (int i = 0; i < capacity; i++)
+    {
+        HashNode* current =
+            buckets[i];
+
+        while (current != nullptr)
+        {
+            const Card& card =
+                current->data;
+
+            card.getJourneyHistory()
+                .writeCSV(
+                    output,
+                    card.getCardNumber());
+
+            current =
+                current->next;
+        }
+    }
+
+    output.close();
+
+    return true;
 }

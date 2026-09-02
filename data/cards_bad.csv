@@ -1,0 +1,5 @@
+cardNumber,holderName,cnic,balance,blocked,active,openJourney,entryStation,entryTime
+1234560000000201,Valid User,3520211111111,500.00,0,1,0,-1,
+not_a_number,Broken User,3520211111112,300.00,0,1,0,-1,
+1234560000000203,Bad Balance,3520211111113,abc,0,1,0,-1,
+1234560000000204,Another Valid User,3520211111114,250.00,1,1,0,-1,

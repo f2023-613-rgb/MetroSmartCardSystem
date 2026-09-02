@@ -54,6 +54,10 @@ public:
     int getCapacity() const;
 
     double getLoadFactor() const;
+
+    bool saveCards(const char* filename) const;
+
+    bool saveJourneys(const char* filename) const;
 };
 
 #endif

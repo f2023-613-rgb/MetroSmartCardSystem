@@ -3,6 +3,7 @@
 
 #include "Journey.h"
 #include "OperationCounter.h"
+#include <ostream>
 
 class JourneyHistory
 {
@@ -55,6 +56,9 @@ public:
     void moveToFirst();
 
     void moveToLast();
+
+    void writeCSV(std::ostream& output,
+              long long cardNumber) const;
 };
 
 #endif
