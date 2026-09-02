@@ -23,6 +23,10 @@ private:
     Station stations[30];
 
     static const double MINIMUM_BALANCE;
+    static const double FARE_PER_STATION;
+
+    double calculateFare(int entryStation,
+                         int exitStation) const;
 
 public:
     MetroSystem();
@@ -64,6 +68,47 @@ public:
     int getGateQueueCount() const;
 
     void replayTransactions() const;
+
+    bool tapIn(long long cardNumber,
+           int stationId,
+           const char* time,
+           OperationCounter& counter);
+
+    bool tapOut(long long cardNumber,
+            int stationId,
+            const char* time,
+            double& chargedFare,
+            OperationCounter& counter);
+
+    bool getCurrentJourney(
+            long long cardNumber,
+            Journey& journey,
+            OperationCounter& counter);
+
+    bool moveJourneyPrevious(
+    long long cardNumber,
+    OperationCounter& counter);
+
+bool moveJourneyNext(
+    long long cardNumber,
+    OperationCounter& counter);
+
+bool insertJourneyAfterCurrent(
+    long long cardNumber,
+    const Journey& journey,
+    OperationCounter& counter);
+
+bool deleteCurrentJourney(
+    long long cardNumber,
+    OperationCounter& counter);
+
+bool moveJourneyToFirst(
+    long long cardNumber,
+    OperationCounter& counter);
+
+bool moveJourneyToLast(
+    long long cardNumber,
+    OperationCounter& counter);
 };
 
 #endif

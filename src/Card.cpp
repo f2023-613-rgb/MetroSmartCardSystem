@@ -1,16 +1,22 @@
 #include "../include/Card.h"
+
 #include <cstring>
 
 Card::Card()
 {
     cardNumber = 0;
 
-    std::strcpy(holderName, "");
-    std::strcpy(cnic, "");
+    holderName[0] = '\0';
+    cnic[0] = '\0';
 
     balance = 0.0;
+
     blocked = false;
     active = true;
+
+    openJourney = false;
+    entryStation = -1;
+    entryTime[0] = '\0';
 }
 
 long long Card::getCardNumber() const
@@ -43,9 +49,37 @@ bool Card::isActive() const
     return active;
 }
 
+bool Card::hasOpenJourney() const
+{
+    return openJourney;
+}
+
+int Card::getEntryStation() const
+{
+    return entryStation;
+}
+
+const char* Card::getEntryTime() const
+{
+    return entryTime;
+}
+
+JourneyHistory& Card::getJourneyHistory()
+{
+    return journeyHistory;
+}
+
+const JourneyHistory& Card::getJourneyHistory() const
+{
+    return journeyHistory;
+}
+
 void Card::setCardNumber(long long number)
 {
-    cardNumber = number;
+    if (number > 0)
+    {
+        cardNumber = number;
+    }
 }
 
 void Card::setHolderName(const char* name)
@@ -56,7 +90,11 @@ void Card::setHolderName(const char* name)
         return;
     }
 
-    std::strncpy(holderName, name, sizeof(holderName) - 1);
+    std::strncpy(
+        holderName,
+        name,
+        sizeof(holderName) - 1);
+
     holderName[sizeof(holderName) - 1] = '\0';
 }
 
@@ -68,7 +106,11 @@ void Card::setCNIC(const char* cnicValue)
         return;
     }
 
-    std::strncpy(cnic, cnicValue, sizeof(cnic) - 1);
+    std::strncpy(
+        cnic,
+        cnicValue,
+        sizeof(cnic) - 1);
+
     cnic[sizeof(cnic) - 1] = '\0';
 }
 
@@ -98,16 +140,63 @@ bool Card::addBalance(double amount)
     }
 
     balance += amount;
+
     return true;
 }
 
 bool Card::deductBalance(double amount)
 {
-    if (amount <= 0.0 || amount > balance)
+    if (amount < 0.0 ||
+        amount > balance)
     {
         return false;
     }
 
     balance -= amount;
+
     return true;
+}
+
+bool Card::openNewJourney(
+    int stationId,
+    const char* time)
+{
+    if (openJourney)
+    {
+        return false;
+    }
+
+    if (stationId < 0 ||
+        stationId >= 30)
+    {
+        return false;
+    }
+
+    entryStation = stationId;
+
+    if (time == nullptr)
+    {
+        entryTime[0] = '\0';
+    }
+    else
+    {
+        std::strncpy(
+            entryTime,
+            time,
+            sizeof(entryTime) - 1);
+
+        entryTime[sizeof(entryTime) - 1] = '\0';
+    }
+
+    openJourney = true;
+
+    return true;
+}
+
+void Card::closeOpenJourney()
+{
+    openJourney = false;
+
+    entryStation = -1;
+    entryTime[0] = '\0';
 }

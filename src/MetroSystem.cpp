@@ -2,6 +2,8 @@
 
 const double MetroSystem::MINIMUM_BALANCE = 50.0;
 
+const double MetroSystem::FARE_PER_STATION = 10.0;
+
 MetroSystem::MetroSystem()
 {
     for (int i = 0; i < 30; i++)
@@ -290,4 +292,349 @@ int MetroSystem::getGateQueueCount() const
 void MetroSystem::replayTransactions() const
 {
     transactionLog.replay();
+}
+
+double MetroSystem::calculateFare(
+    int entryStation,
+    int exitStation) const
+{
+    int distance =
+        exitStation - entryStation;
+
+    if (distance < 0)
+    {
+        distance = -distance;
+    }
+
+    return distance * FARE_PER_STATION;
+}
+
+bool MetroSystem::tapIn(
+    long long cardNumber,
+    int stationId,
+    const char* time,
+    OperationCounter& counter)
+{
+    counter.incrementComparisons();
+
+    if (stationId < 0 ||
+        stationId >= 30)
+    {
+        return false;
+    }
+
+    Card* card =
+        cards.search(
+            cardNumber,
+            counter);
+
+    counter.incrementComparisons();
+
+    if (card == nullptr)
+    {
+        return false;
+    }
+
+    counter.incrementComparisons();
+
+    if (!card->isActive())
+    {
+        return false;
+    }
+
+    bool blocked =
+        blockedCards.isBlocked(
+            cardNumber,
+            counter);
+
+    counter.incrementComparisons();
+
+    if (blocked)
+    {
+        return false;
+    }
+
+    counter.incrementComparisons();
+
+    if (card->getBalance()
+        < MINIMUM_BALANCE)
+    {
+        return false;
+    }
+
+    counter.incrementComparisons();
+
+    if (card->hasOpenJourney())
+    {
+        return false;
+    }
+
+    if (!card->openNewJourney(
+            stationId,
+            time))
+    {
+        return false;
+    }
+
+    counter.incrementSteps();
+
+    transactionLog.append(
+        TransactionLog::TAP_IN,
+        cardNumber,
+        0.0,
+        stationId,
+        time,
+        counter);
+
+    return true;
+}
+
+bool MetroSystem::tapOut(
+    long long cardNumber,
+    int stationId,
+    const char* time,
+    double& chargedFare,
+    OperationCounter& counter)
+{
+    chargedFare = 0.0;
+
+    counter.incrementComparisons();
+
+    if (stationId < 0 ||
+        stationId >= 30)
+    {
+        return false;
+    }
+
+    Card* card =
+        cards.search(
+            cardNumber,
+            counter);
+
+    counter.incrementComparisons();
+
+    if (card == nullptr)
+    {
+        return false;
+    }
+
+    counter.incrementComparisons();
+
+    if (!card->hasOpenJourney())
+    {
+        return false;
+    }
+
+    int entryStation =
+        card->getEntryStation();
+
+    const char* entryTime =
+        card->getEntryTime();
+
+    double fare =
+        calculateFare(
+            entryStation,
+            stationId);
+
+    counter.addSteps(3);
+
+    counter.incrementComparisons();
+
+    if (fare > card->getBalance())
+    {
+        return false;
+    }
+
+    Journey completedJourney;
+
+    completedJourney.setEntryStation(
+        entryStation);
+
+    completedJourney.setExitStation(
+        stationId);
+
+    completedJourney.setEntryTime(
+        entryTime);
+
+    completedJourney.setExitTime(
+        time);
+
+    completedJourney.setFare(
+        fare);
+
+    counter.addSteps(5);
+
+    if (!card->deductBalance(fare))
+    {
+        return false;
+    }
+
+    JourneyHistory& history =
+        card->getJourneyHistory();
+
+    if (!history.addJourney(
+            completedJourney,
+            counter))
+    {
+        return false;
+    }
+
+    card->closeOpenJourney();
+
+    counter.incrementSteps();
+
+    transactionLog.append(
+        TransactionLog::TAP_OUT,
+        cardNumber,
+        fare,
+        stationId,
+        time,
+        counter);
+
+    chargedFare = fare;
+
+    return true;
+}
+
+bool MetroSystem::getCurrentJourney(
+    long long cardNumber,
+    Journey& journey,
+    OperationCounter& counter)
+{
+    Card* card =
+        cards.search(
+            cardNumber,
+            counter);
+
+    if (card == nullptr)
+    {
+        return false;
+    }
+
+    return card
+        ->getJourneyHistory()
+        .getCurrentJourney(journey);
+}
+
+bool MetroSystem::moveJourneyPrevious(
+    long long cardNumber,
+    OperationCounter& counter)
+{
+    Card* card =
+        cards.search(
+            cardNumber,
+            counter);
+
+    if (card == nullptr)
+    {
+        return false;
+    }
+
+    return card
+        ->getJourneyHistory()
+        .movePrevious(counter);
+}
+
+bool MetroSystem::moveJourneyNext(
+    long long cardNumber,
+    OperationCounter& counter)
+{
+    Card* card =
+        cards.search(
+            cardNumber,
+            counter);
+
+    if (card == nullptr)
+    {
+        return false;
+    }
+
+    return card
+        ->getJourneyHistory()
+        .moveNext(counter);
+}
+
+bool MetroSystem::insertJourneyAfterCurrent(
+    long long cardNumber,
+    const Journey& journey,
+    OperationCounter& counter)
+{
+    Card* card =
+        cards.search(
+            cardNumber,
+            counter);
+
+    if (card == nullptr)
+    {
+        return false;
+    }
+
+    return card
+        ->getJourneyHistory()
+        .insertAfterCurrent(
+            journey,
+            counter);
+}
+
+bool MetroSystem::deleteCurrentJourney(
+    long long cardNumber,
+    OperationCounter& counter)
+{
+    Card* card =
+        cards.search(
+            cardNumber,
+            counter);
+
+    if (card == nullptr)
+    {
+        return false;
+    }
+
+    return card
+        ->getJourneyHistory()
+        .deleteCurrent(counter);
+}
+
+bool MetroSystem::moveJourneyToFirst(
+    long long cardNumber,
+    OperationCounter& counter)
+{
+    Card* card =
+        cards.search(
+            cardNumber,
+            counter);
+
+    if (card == nullptr)
+    {
+        return false;
+    }
+
+    card->getJourneyHistory()
+        .moveToFirst();
+
+    counter.incrementSteps();
+
+    return true;
+}
+
+bool MetroSystem::moveJourneyToLast(
+    long long cardNumber,
+    OperationCounter& counter)
+{
+    Card* card =
+        cards.search(
+            cardNumber,
+            counter);
+
+    if (card == nullptr)
+    {
+        return false;
+    }
+
+    card->getJourneyHistory()
+        .moveToLast();
+
+    counter.incrementSteps();
+
+    return true;
 }
