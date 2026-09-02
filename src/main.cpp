@@ -7,6 +7,7 @@
 #include "../include/TopUpStack.h"
 #include "../include/TransactionLog.h"
 #include "../include/JourneyHistory.h"
+#include "../include/CardHashTable.h"
 int main()
 {
     Card card;
@@ -417,6 +418,273 @@ assignedHistory = history;
 std::cout << "Assigned history count: "
           << assignedHistory.getCount()
           << '\n';
+
+std::cout
+    << "\n=== CARD HASH TABLE TEST ===\n";
+
+CardHashTable cardTable;
+OperationCounter hashCounter;
+
+Card c1;
+c1.setCardNumber(
+    1234560000000001LL);
+c1.setHolderName("Ali");
+c1.setCNIC("3520211111111");
+c1.setBalance(500.0);
+
+Card c2;
+c2.setCardNumber(
+    1234560000000002LL);
+c2.setHolderName("Ahmed");
+c2.setCNIC("3520222222222");
+c2.setBalance(700.0);
+
+Card c3;
+c3.setCardNumber(
+    1234560000000003LL);
+c3.setHolderName("Sara");
+c3.setCNIC("3520233333333");
+c3.setBalance(900.0);
+
+cardTable.insert(
+    c1,
+    hashCounter);
+
+cardTable.insert(
+    c2,
+    hashCounter);
+
+cardTable.insert(
+    c3,
+    hashCounter);
+
+std::cout
+    << "Cards stored: "
+    << cardTable.getCount()
+    << '\n';
+
+std::cout
+    << "Table capacity: "
+    << cardTable.getCapacity()
+    << '\n';
+
+std::cout
+    << "Load factor: "
+    << cardTable.getLoadFactor()
+    << '\n';
+
+OperationCounter searchCounter;
+
+Card* foundCard =
+    cardTable.search(
+        1234560000000002LL,
+        searchCounter);
+
+if (foundCard != nullptr)
+{
+    std::cout
+        << "Found card holder: "
+        << foundCard->getHolderName()
+        << '\n';
+
+    std::cout
+        << "Found balance: "
+        << foundCard->getBalance()
+        << '\n';
+}
+else
+{
+    std::cout
+        << "Card not found.\n";
+}
+
+std::cout
+    << "Search steps: "
+    << searchCounter.getSteps()
+    << '\n';
+
+std::cout
+    << "Search comparisons: "
+    << searchCounter.getComparisons()
+    << '\n';
+
+OperationCounter missingCounter;
+
+Card* missing =
+    cardTable.search(
+        1234569999999999LL,
+        missingCounter);
+
+if (missing == nullptr)
+{
+    std::cout
+        << "Missing card handled correctly.\n";
+}
+
+OperationCounter duplicateCounter;
+
+if (!cardTable.insert(
+        c2,
+        duplicateCounter))
+{
+    std::cout
+        << "Duplicate card rejected correctly.\n";
+}
+
+OperationCounter modifyCounter;
+
+Card* cardToModify =
+    cardTable.search(
+        1234560000000001LL,
+        modifyCounter);
+
+if (cardToModify != nullptr)
+{
+    cardToModify->addBalance(100.0);
+
+    std::cout
+        << "New balance after top-up: "
+        << cardToModify->getBalance()
+        << '\n';
+}
+
+OperationCounter removeCounter;
+
+if (cardTable.remove(
+        1234560000000003LL,
+        removeCounter))
+{
+    std::cout
+        << "Card removed successfully.\n";
+}
+
+std::cout
+    << "Cards after removal: "
+    << cardTable.getCount()
+    << '\n';
+
+CardHashTable copiedTable =
+    cardTable;
+
+std::cout
+    << "Copied table count: "
+    << copiedTable.getCount()
+    << '\n';
+
+CardHashTable assignedTable;
+
+assignedTable =
+    cardTable;
+
+std::cout
+    << "Assigned table count: "
+    << assignedTable.getCount()
+    << '\n';
+
+std::cout
+    << "\n=== HASH TABLE SCALE TEST ===\n";
+
+CardHashTable largeTable;
+OperationCounter largeCounter;
+
+for (int i = 0; i < 50000; i++)
+{
+    Card testCard;
+
+    long long number =
+        1234560000000000LL + i;
+
+    testCard.setCardNumber(number);
+    testCard.setHolderName("Test User");
+    testCard.setCNIC("0000000000000");
+    testCard.setBalance(500.0);
+
+    largeTable.insert(
+        testCard,
+        largeCounter);
+}
+
+std::cout
+    << "Large table card count: "
+    << largeTable.getCount()
+    << '\n';
+
+std::cout
+    << "Large table capacity: "
+    << largeTable.getCapacity()
+    << '\n';
+
+std::cout
+    << "Large table load factor: "
+    << largeTable.getLoadFactor()
+    << '\n';
+
+OperationCounter largeSearchCounter;
+
+Card* largeFound =
+    largeTable.search(
+        1234560000049999LL,
+        largeSearchCounter);
+
+if (largeFound != nullptr)
+{
+    std::cout
+        << "50,000-card lookup successful.\n";
+}
+
+std::cout
+    << "Large search steps: "
+    << largeSearchCounter.getSteps()
+    << '\n';
+
+std::cout
+    << "Large search comparisons: "
+    << largeSearchCounter.getComparisons()
+    << '\n';
+
+std::cout
+    << "\n=== HASH LOOKUP COMPARISON ===\n";
+
+CardHashTable table5000;
+OperationCounter insert5000;
+
+for (int i = 0; i < 5000; i++)
+{
+    Card testCard;
+
+    testCard.setCardNumber(
+        1234560000000000LL + i);
+
+    testCard.setHolderName("Test");
+    testCard.setCNIC("0000000000000");
+    testCard.setBalance(100.0);
+
+    table5000.insert(
+        testCard,
+        insert5000);
+}
+
+OperationCounter search5000;
+
+table5000.search(
+    1234560000004999LL,
+    search5000);
+
+OperationCounter search50000;
+
+largeTable.search(
+    1234560000049999LL,
+    search50000);
+
+std::cout
+    << "5,000 cards - comparisons: "
+    << search5000.getComparisons()
+    << '\n';
+
+std::cout
+    << "50,000 cards - comparisons: "
+    << search50000.getComparisons()
+    << '\n';
 
     return 0;
 }
