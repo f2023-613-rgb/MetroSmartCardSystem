@@ -3,7 +3,7 @@
 #include <chrono>
 
 #include "../include/MetroSystem.h"
-
+#include "../include/CommandProcessor.h"
 
 void clearInput()
 {
@@ -75,7 +75,7 @@ void showMenu()
 }
 
 
-int main()
+int main(int argc, char* argv[])
 {
     MetroSystem system;
 
@@ -110,6 +110,30 @@ int main()
             << "journeys.csv not found. "
             << "Starting with empty journeys.\n";
     }
+
+    if (argc > 1)
+{
+    std::cout
+        << "\nRunning command-file mode.\n";
+
+    CommandProcessor processor(system);
+
+    bool success =
+        processor.processFile(argv[1]);
+
+    system.saveCards(
+        "data/cards.csv");
+
+    system.saveJourneys(
+        "data/journeys.csv");
+
+    if (!success)
+    {
+        return 1;
+    }
+
+    return 0;
+}
 
     std::cout
         << "\nRegistered cards: "
