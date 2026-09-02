@@ -36,3 +36,13 @@ run: $(TARGET)
 
 commands: $(TARGET)
 	./$(TARGET) data/commands.txt
+
+performance:
+	$(CXX) $(CXXFLAGS) \
+	tests/performance_test.cpp \
+	src/Card.cpp \
+	src/Journey.cpp \
+	src/JourneyHistory.cpp \
+	src/OperationCounter.cpp \
+	src/CardHashTable.cpp \
+	-o performance_test

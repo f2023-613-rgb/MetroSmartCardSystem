@@ -1,0 +1,49 @@
+=====================================
+ CARD HASH TABLE PERFORMANCE TEST
+=====================================
+
+=====================================
+Testing with 5000 cards
+=====================================
+Cards stored: 5000
+Hash table capacity: 10007
+Load factor: 0.4997
+Total insertion time: 919 microseconds
+Search repetitions: 10000
+Successful searches: 10000
+Total search time: 70 microseconds
+Average search time: 0.0070 microseconds
+Average comparisons: 1.0000
+Average steps: 2.0000
+
+=====================================
+Testing with 20000 cards
+=====================================
+Cards stored: 20000
+Hash table capacity: 40031
+Load factor: 0.4996
+Total insertion time: 4510 microseconds
+Search repetitions: 10000
+Successful searches: 10000
+Total search time: 76 microseconds
+Average search time: 0.0076 microseconds
+Average comparisons: 1.0000
+Average steps: 2.0000
+
+=====================================
+Testing with 50000 cards
+=====================================
+Cards stored: 50000
+Hash table capacity: 80063
+Load factor: 0.6245
+Total insertion time: 13117 microseconds
+Search repetitions: 10000
+Successful searches: 10000
+Total search time: 77 microseconds
+Average search time: 0.0077 microseconds
+Average comparisons: 1.0000
+Average steps: 2.0000
+
+=====================================
+Performance test complete.
+=====================================
