@@ -171,6 +171,11 @@ MetroSmartCardSystem/
 |
 |-- tests/
 |   `-- structure_tests.cpp
+|   `-- memory_test.cpp
+|   `-- performance_test.cpp
+|   `-- performance_result.txt
+|   `-- system_test.cpp
+|   `-- test_log.txt
 |
 |-- Makefile
 |-- README.md
@@ -459,6 +464,34 @@ Implemented using a doubly linked list supporting:
 ->constant-time known-position insertion
 ->constant-time deletion of current journey
 ->maximum 20 journeys
+
+TESTING
+
+Functional test
+
+Windows:
+</> Bash
+mingw32-make test
+
+Passed: 14
+Failed: 0
+ALL FUNCTIONAL TESTS PASSED
+
+performance_test
+</> Bash
+mingw32-make performance
+.\performance_test
+
+Actual measured results are stored in:
+tests/performance_results.txt
+
+Rule of Three / Memory Behavior Test
+Compile:
+</> Bash
+g++ -std=c++17 -Wall -Wextra -pedantic tests/memory_test.cpp src/Card.cpp src/Journey.cpp src/JourneyHistory.cpp src/OperationCounter.cpp src/GateQueue.cpp src/TopUpStack.cpp src/TransactionLog.cpp src/CardHashTable.cpp src/BlockedCardHashTable.cpp -Iinclude -o memory_test
+
+</> Bash
+.\memory_test
 
 GIT
  
