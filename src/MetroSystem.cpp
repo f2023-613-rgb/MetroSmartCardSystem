@@ -449,6 +449,18 @@ bool MetroSystem::tapOut(
         return false;
     }
 
+    bool blocked =
+        blockedCards.isBlocked(
+            cardNumber,
+            counter);
+
+    counter.incrementComparisons();
+
+    if (blocked)
+    {
+        return false;
+    }
+
     counter.incrementComparisons();
 
     if (!card->hasOpenJourney())
