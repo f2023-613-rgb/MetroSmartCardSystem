@@ -1,7 +1,9 @@
 #include <iostream>
 #include <limits>
+#include <chrono>
 
 #include "../include/MetroSystem.h"
+
 
 void clearInput()
 {
@@ -12,9 +14,27 @@ void clearInput()
         '\n');
 }
 
-void printOperationStats(
-    const OperationCounter& counter)
+
+long long getElapsedMicroseconds(
+    const std::chrono::high_resolution_clock::time_point& start,
+    const std::chrono::high_resolution_clock::time_point& end)
 {
+    return std::chrono::duration_cast<
+        std::chrono::microseconds>(
+            end - start)
+        .count();
+}
+
+
+void printOperationStats(
+    const OperationCounter& counter,
+    long long microseconds)
+{
+    std::cout
+        << "Time: "
+        << microseconds
+        << " microseconds\n";
+
     std::cout
         << "Steps: "
         << counter.getSteps()
@@ -25,6 +45,7 @@ void printOperationStats(
         << counter.getComparisons()
         << '\n';
 }
+
 
 void showMenu()
 {
@@ -53,9 +74,15 @@ void showMenu()
         << "Enter choice: ";
 }
 
+
 int main()
 {
     MetroSystem system;
+
+    std::cout
+        << "=====================================\n"
+        << "       METRO SMART CARD SYSTEM\n"
+        << "=====================================\n\n";
 
     std::cout
         << "Loading data...\n";
@@ -68,7 +95,8 @@ int main()
     else
     {
         std::cout
-            << "cards.csv not found. Starting with empty cards.\n";
+            << "cards.csv not found. "
+            << "Starting with empty cards.\n";
     }
 
     if (system.loadJourneys("data/journeys.csv"))
@@ -79,8 +107,19 @@ int main()
     else
     {
         std::cout
-            << "journeys.csv not found. Starting with empty journeys.\n";
+            << "journeys.csv not found. "
+            << "Starting with empty journeys.\n";
     }
+
+    std::cout
+        << "\nRegistered cards: "
+        << system.getRegisteredCardCount()
+        << '\n';
+
+    std::cout
+        << "Blocked cards: "
+        << system.getBlockedCardCount()
+        << '\n';
 
     int choice = -1;
 
@@ -104,6 +143,9 @@ int main()
 
         switch (choice)
         {
+            // =====================================================
+            // 1. REGISTER CARD
+            // =====================================================
             case 1:
             {
                 long long cardNumber;
@@ -115,6 +157,16 @@ int main()
                     << "Enter 16-digit card number: ";
 
                 std::cin >> cardNumber;
+
+                if (std::cin.fail())
+                {
+                    clearInput();
+
+                    std::cout
+                        << "Invalid card number.\n";
+
+                    break;
+                }
 
                 clearInput();
 
@@ -137,12 +189,31 @@ int main()
 
                 std::cin >> balance;
 
-                if (system.registerCard(
+                if (std::cin.fail())
+                {
+                    clearInput();
+
+                    std::cout
+                        << "Invalid balance.\n";
+
+                    break;
+                }
+
+                auto start =
+                    std::chrono::high_resolution_clock::now();
+
+                bool success =
+                    system.registerCard(
                         cardNumber,
                         holderName,
                         cnic,
                         balance,
-                        counter))
+                        counter);
+
+                auto end =
+                    std::chrono::high_resolution_clock::now();
+
+                if (success)
                 {
                     std::cout
                         << "Card registered successfully.\n";
@@ -153,11 +224,19 @@ int main()
                         << "Card registration failed.\n";
                 }
 
-                printOperationStats(counter);
+                printOperationStats(
+                    counter,
+                    getElapsedMicroseconds(
+                        start,
+                        end));
 
                 break;
             }
 
+
+            // =====================================================
+            // 2. FIND / SHOW CARD
+            // =====================================================
             case 2:
             {
                 long long cardNumber;
@@ -167,10 +246,26 @@ int main()
 
                 std::cin >> cardNumber;
 
+                if (std::cin.fail())
+                {
+                    clearInput();
+
+                    std::cout
+                        << "Invalid card number.\n";
+
+                    break;
+                }
+
+                auto start =
+                    std::chrono::high_resolution_clock::now();
+
                 Card* card =
                     system.findCard(
                         cardNumber,
                         counter);
+
+                auto end =
+                    std::chrono::high_resolution_clock::now();
 
                 if (card == nullptr)
                 {
@@ -180,7 +275,10 @@ int main()
                 else
                 {
                     std::cout
-                        << "\nCard Number: "
+                        << "\n--- CARD DETAILS ---\n";
+
+                    std::cout
+                        << "Card Number: "
                         << card->getCardNumber()
                         << '\n';
 
@@ -220,6 +318,19 @@ int main()
                             : "No")
                         << '\n';
 
+                    if (card->hasOpenJourney())
+                    {
+                        std::cout
+                            << "Entry Station: "
+                            << card->getEntryStation()
+                            << '\n';
+
+                        std::cout
+                            << "Entry Time: "
+                            << card->getEntryTime()
+                            << '\n';
+                    }
+
                     std::cout
                         << "Journey Count: "
                         << card
@@ -228,11 +339,19 @@ int main()
                         << '\n';
                 }
 
-                printOperationStats(counter);
+                printOperationStats(
+                    counter,
+                    getElapsedMicroseconds(
+                        start,
+                        end));
 
                 break;
             }
 
+
+            // =====================================================
+            // 3. TOP UP CARD
+            // =====================================================
             case 3:
             {
                 long long cardNumber;
@@ -249,6 +368,16 @@ int main()
 
                 std::cin >> amount;
 
+                if (std::cin.fail())
+                {
+                    clearInput();
+
+                    std::cout
+                        << "Invalid input.\n";
+
+                    break;
+                }
+
                 clearInput();
 
                 std::cout
@@ -258,11 +387,20 @@ int main()
                     time,
                     sizeof(time));
 
-                if (system.topUpCard(
+                auto start =
+                    std::chrono::high_resolution_clock::now();
+
+                bool success =
+                    system.topUpCard(
                         cardNumber,
                         amount,
                         time,
-                        counter))
+                        counter);
+
+                auto end =
+                    std::chrono::high_resolution_clock::now();
+
+                if (success)
                 {
                     std::cout
                         << "Top-up successful.\n";
@@ -273,15 +411,32 @@ int main()
                         << "Top-up failed.\n";
                 }
 
-                printOperationStats(counter);
+                printOperationStats(
+                    counter,
+                    getElapsedMicroseconds(
+                        start,
+                        end));
 
                 break;
             }
 
+
+            // =====================================================
+            // 4. UNDO LAST TOP-UP
+            // =====================================================
             case 4:
             {
-                if (system.undoLastTopUp(
-                        counter))
+                auto start =
+                    std::chrono::high_resolution_clock::now();
+
+                bool success =
+                    system.undoLastTopUp(
+                        counter);
+
+                auto end =
+                    std::chrono::high_resolution_clock::now();
+
+                if (success)
                 {
                     std::cout
                         << "Last top-up undone successfully.\n";
@@ -292,11 +447,19 @@ int main()
                         << "No top-up could be undone.\n";
                 }
 
-                printOperationStats(counter);
+                printOperationStats(
+                    counter,
+                    getElapsedMicroseconds(
+                        start,
+                        end));
 
                 break;
             }
 
+
+            // =====================================================
+            // 5. BLOCK CARD
+            // =====================================================
             case 5:
             {
                 long long cardNumber;
@@ -307,6 +470,16 @@ int main()
 
                 std::cin >> cardNumber;
 
+                if (std::cin.fail())
+                {
+                    clearInput();
+
+                    std::cout
+                        << "Invalid card number.\n";
+
+                    break;
+                }
+
                 clearInput();
 
                 std::cout
@@ -316,13 +489,27 @@ int main()
                     time,
                     sizeof(time));
 
-                if (system.blockCard(
+                auto start =
+                    std::chrono::high_resolution_clock::now();
+
+                bool success =
+                    system.blockCard(
                         cardNumber,
                         time,
-                        counter))
+                        counter);
+
+                auto end =
+                    std::chrono::high_resolution_clock::now();
+
+                if (success)
                 {
                     std::cout
                         << "Card blocked successfully.\n";
+
+                    std::cout
+                        << "Total blocked cards: "
+                        << system.getBlockedCardCount()
+                        << '\n';
                 }
                 else
                 {
@@ -330,11 +517,19 @@ int main()
                         << "Could not block card.\n";
                 }
 
-                printOperationStats(counter);
+                printOperationStats(
+                    counter,
+                    getElapsedMicroseconds(
+                        start,
+                        end));
 
                 break;
             }
 
+
+            // =====================================================
+            // 6. UNBLOCK CARD
+            // =====================================================
             case 6:
             {
                 long long cardNumber;
@@ -345,6 +540,16 @@ int main()
 
                 std::cin >> cardNumber;
 
+                if (std::cin.fail())
+                {
+                    clearInput();
+
+                    std::cout
+                        << "Invalid card number.\n";
+
+                    break;
+                }
+
                 clearInput();
 
                 std::cout
@@ -354,13 +559,27 @@ int main()
                     time,
                     sizeof(time));
 
-                if (system.unblockCard(
+                auto start =
+                    std::chrono::high_resolution_clock::now();
+
+                bool success =
+                    system.unblockCard(
                         cardNumber,
                         time,
-                        counter))
+                        counter);
+
+                auto end =
+                    std::chrono::high_resolution_clock::now();
+
+                if (success)
                 {
                     std::cout
                         << "Card unblocked successfully.\n";
+
+                    std::cout
+                        << "Total blocked cards: "
+                        << system.getBlockedCardCount()
+                        << '\n';
                 }
                 else
                 {
@@ -368,11 +587,19 @@ int main()
                         << "Could not unblock card.\n";
                 }
 
-                printOperationStats(counter);
+                printOperationStats(
+                    counter,
+                    getElapsedMicroseconds(
+                        start,
+                        end));
 
                 break;
             }
 
+
+            // =====================================================
+            // 7. TAP IN
+            // =====================================================
             case 7:
             {
                 long long cardNumber;
@@ -389,6 +616,16 @@ int main()
 
                 std::cin >> stationId;
 
+                if (std::cin.fail())
+                {
+                    clearInput();
+
+                    std::cout
+                        << "Invalid input.\n";
+
+                    break;
+                }
+
                 clearInput();
 
                 std::cout
@@ -398,11 +635,20 @@ int main()
                     time,
                     sizeof(time));
 
-                if (system.tapIn(
+                auto start =
+                    std::chrono::high_resolution_clock::now();
+
+                bool success =
+                    system.tapIn(
                         cardNumber,
                         stationId,
                         time,
-                        counter))
+                        counter);
+
+                auto end =
+                    std::chrono::high_resolution_clock::now();
+
+                if (success)
                 {
                     std::cout
                         << "Tap-in successful.\n";
@@ -411,18 +657,32 @@ int main()
                 {
                     std::cout
                         << "Tap-in failed.\n";
+
+                    std::cout
+                        << "Possible reasons: card missing, "
+                        << "inactive, blocked, low balance, "
+                        << "invalid station, or journey already open.\n";
                 }
 
-                printOperationStats(counter);
+                printOperationStats(
+                    counter,
+                    getElapsedMicroseconds(
+                        start,
+                        end));
 
                 break;
             }
 
+
+            // =====================================================
+            // 8. TAP OUT
+            // =====================================================
             case 8:
             {
                 long long cardNumber;
                 int stationId;
                 char time[30];
+
                 double fare = 0.0;
 
                 std::cout
@@ -435,6 +695,16 @@ int main()
 
                 std::cin >> stationId;
 
+                if (std::cin.fail())
+                {
+                    clearInput();
+
+                    std::cout
+                        << "Invalid input.\n";
+
+                    break;
+                }
+
                 clearInput();
 
                 std::cout
@@ -444,12 +714,21 @@ int main()
                     time,
                     sizeof(time));
 
-                if (system.tapOut(
+                auto start =
+                    std::chrono::high_resolution_clock::now();
+
+                bool success =
+                    system.tapOut(
                         cardNumber,
                         stationId,
                         time,
                         fare,
-                        counter))
+                        counter);
+
+                auto end =
+                    std::chrono::high_resolution_clock::now();
+
+                if (success)
                 {
                     std::cout
                         << "Tap-out successful.\n";
@@ -465,11 +744,19 @@ int main()
                         << "Tap-out failed.\n";
                 }
 
-                printOperationStats(counter);
+                printOperationStats(
+                    counter,
+                    getElapsedMicroseconds(
+                        start,
+                        end));
 
                 break;
             }
 
+
+            // =====================================================
+            // 9. ADD PASSENGER TO GATE QUEUE
+            // =====================================================
             case 9:
             {
                 long long cardNumber;
@@ -479,9 +766,28 @@ int main()
 
                 std::cin >> cardNumber;
 
-                if (system.addPassengerToGate(
+                if (std::cin.fail())
+                {
+                    clearInput();
+
+                    std::cout
+                        << "Invalid card number.\n";
+
+                    break;
+                }
+
+                auto start =
+                    std::chrono::high_resolution_clock::now();
+
+                bool success =
+                    system.addPassengerToGate(
                         cardNumber,
-                        counter))
+                        counter);
+
+                auto end =
+                    std::chrono::high_resolution_clock::now();
+
+                if (success)
                 {
                     std::cout
                         << "Passenger added to gate queue.\n";
@@ -497,18 +803,35 @@ int main()
                         << "Could not add passenger.\n";
                 }
 
-                printOperationStats(counter);
+                printOperationStats(
+                    counter,
+                    getElapsedMicroseconds(
+                        start,
+                        end));
 
                 break;
             }
 
+
+            // =====================================================
+            // 10. SERVE NEXT PASSENGER
+            // =====================================================
             case 10:
             {
                 long long servedCard = 0;
 
-                if (system.serveNextPassenger(
+                auto start =
+                    std::chrono::high_resolution_clock::now();
+
+                bool success =
+                    system.serveNextPassenger(
                         servedCard,
-                        counter))
+                        counter);
+
+                auto end =
+                    std::chrono::high_resolution_clock::now();
+
+                if (success)
                 {
                     std::cout
                         << "Served card: "
@@ -526,11 +849,19 @@ int main()
                         << "Gate queue is empty.\n";
                 }
 
-                printOperationStats(counter);
+                printOperationStats(
+                    counter,
+                    getElapsedMicroseconds(
+                        start,
+                        end));
 
                 break;
             }
 
+
+            // =====================================================
+            // 11. SHOW CURRENT JOURNEY
+            // =====================================================
             case 11:
             {
                 long long cardNumber;
@@ -541,11 +872,33 @@ int main()
 
                 std::cin >> cardNumber;
 
-                if (system.getCurrentJourney(
+                if (std::cin.fail())
+                {
+                    clearInput();
+
+                    std::cout
+                        << "Invalid card number.\n";
+
+                    break;
+                }
+
+                auto start =
+                    std::chrono::high_resolution_clock::now();
+
+                bool success =
+                    system.getCurrentJourney(
                         cardNumber,
                         journey,
-                        counter))
+                        counter);
+
+                auto end =
+                    std::chrono::high_resolution_clock::now();
+
+                if (success)
                 {
+                    std::cout
+                        << "\n--- CURRENT JOURNEY ---\n";
+
                     std::cout
                         << "Entry Station: "
                         << journey.getEntryStation()
@@ -577,11 +930,19 @@ int main()
                         << "No current journey available.\n";
                 }
 
-                printOperationStats(counter);
+                printOperationStats(
+                    counter,
+                    getElapsedMicroseconds(
+                        start,
+                        end));
 
                 break;
             }
 
+
+            // =====================================================
+            // 12. MOVE JOURNEY PREVIOUS
+            // =====================================================
             case 12:
             {
                 long long cardNumber;
@@ -591,9 +952,28 @@ int main()
 
                 std::cin >> cardNumber;
 
-                if (system.moveJourneyPrevious(
+                if (std::cin.fail())
+                {
+                    clearInput();
+
+                    std::cout
+                        << "Invalid card number.\n";
+
+                    break;
+                }
+
+                auto start =
+                    std::chrono::high_resolution_clock::now();
+
+                bool success =
+                    system.moveJourneyPrevious(
                         cardNumber,
-                        counter))
+                        counter);
+
+                auto end =
+                    std::chrono::high_resolution_clock::now();
+
+                if (success)
                 {
                     std::cout
                         << "Moved to previous journey.\n";
@@ -604,11 +984,19 @@ int main()
                         << "Cannot move to previous journey.\n";
                 }
 
-                printOperationStats(counter);
+                printOperationStats(
+                    counter,
+                    getElapsedMicroseconds(
+                        start,
+                        end));
 
                 break;
             }
 
+
+            // =====================================================
+            // 13. MOVE JOURNEY NEXT
+            // =====================================================
             case 13:
             {
                 long long cardNumber;
@@ -618,9 +1006,28 @@ int main()
 
                 std::cin >> cardNumber;
 
-                if (system.moveJourneyNext(
+                if (std::cin.fail())
+                {
+                    clearInput();
+
+                    std::cout
+                        << "Invalid card number.\n";
+
+                    break;
+                }
+
+                auto start =
+                    std::chrono::high_resolution_clock::now();
+
+                bool success =
+                    system.moveJourneyNext(
                         cardNumber,
-                        counter))
+                        counter);
+
+                auto end =
+                    std::chrono::high_resolution_clock::now();
+
+                if (success)
                 {
                     std::cout
                         << "Moved to next journey.\n";
@@ -631,11 +1038,19 @@ int main()
                         << "Cannot move to next journey.\n";
                 }
 
-                printOperationStats(counter);
+                printOperationStats(
+                    counter,
+                    getElapsedMicroseconds(
+                        start,
+                        end));
 
                 break;
             }
 
+
+            // =====================================================
+            // 14. DELETE CURRENT JOURNEY
+            // =====================================================
             case 14:
             {
                 long long cardNumber;
@@ -645,9 +1060,28 @@ int main()
 
                 std::cin >> cardNumber;
 
-                if (system.deleteCurrentJourney(
+                if (std::cin.fail())
+                {
+                    clearInput();
+
+                    std::cout
+                        << "Invalid card number.\n";
+
+                    break;
+                }
+
+                auto start =
+                    std::chrono::high_resolution_clock::now();
+
+                bool success =
+                    system.deleteCurrentJourney(
                         cardNumber,
-                        counter))
+                        counter);
+
+                auto end =
+                    std::chrono::high_resolution_clock::now();
+
+                if (success)
                 {
                     std::cout
                         << "Current journey deleted.\n";
@@ -658,23 +1092,51 @@ int main()
                         << "No journey deleted.\n";
                 }
 
-                printOperationStats(counter);
+                printOperationStats(
+                    counter,
+                    getElapsedMicroseconds(
+                        start,
+                        end));
 
                 break;
             }
 
+
+            // =====================================================
+            // 15. REPLAY DAILY TRANSACTIONS
+            // =====================================================
             case 15:
             {
                 std::cout
                     << "\n=== DAILY TRANSACTION REPLAY ===\n";
 
+                auto start =
+                    std::chrono::high_resolution_clock::now();
+
                 system.replayTransactions();
+
+                auto end =
+                    std::chrono::high_resolution_clock::now();
+
+                std::cout
+                    << "Replay time: "
+                    << getElapsedMicroseconds(
+                        start,
+                        end)
+                    << " microseconds\n";
 
                 break;
             }
 
+
+            // =====================================================
+            // 16. SAVE DATA
+            // =====================================================
             case 16:
             {
+                auto start =
+                    std::chrono::high_resolution_clock::now();
+
                 bool cardsSaved =
                     system.saveCards(
                         "data/cards.csv");
@@ -682,6 +1144,9 @@ int main()
                 bool journeysSaved =
                     system.saveJourneys(
                         "data/journeys.csv");
+
+                auto end =
+                    std::chrono::high_resolution_clock::now();
 
                 if (cardsSaved &&
                     journeysSaved)
@@ -695,9 +1160,20 @@ int main()
                         << "Error while saving data.\n";
                 }
 
+                std::cout
+                    << "Save time: "
+                    << getElapsedMicroseconds(
+                        start,
+                        end)
+                    << " microseconds\n";
+
                 break;
             }
 
+
+            // =====================================================
+            // 0. EXIT
+            // =====================================================
             case 0:
             {
                 std::cout
@@ -729,6 +1205,10 @@ int main()
                 break;
             }
 
+
+            // =====================================================
+            // INVALID MENU CHOICE
+            // =====================================================
             default:
             {
                 std::cout
