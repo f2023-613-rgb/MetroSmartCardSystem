@@ -8,6 +8,7 @@
 #include "../include/TransactionLog.h"
 #include "../include/JourneyHistory.h"
 #include "../include/CardHashTable.h"
+#include "../include/BlockedCardHashTable.h"
 int main()
 {
     Card card;
@@ -684,6 +685,102 @@ std::cout
 std::cout
     << "50,000 cards - comparisons: "
     << search50000.getComparisons()
+    << '\n';
+
+std::cout
+    << "\n=== BLOCKED CARD HASH TABLE TEST ===\n";
+
+BlockedCardHashTable blockedTable;
+OperationCounter blockedCounter;
+
+blockedTable.blockCard(
+    1234560000000002LL,
+    blockedCounter);
+
+blockedTable.blockCard(
+    1234560000000005LL,
+    blockedCounter);
+
+blockedTable.blockCard(
+    1234560000000009LL,
+    blockedCounter);
+
+std::cout
+    << "Blocked cards: "
+    << blockedTable.getCount()
+    << '\n';
+
+OperationCounter blockedSearchCounter;
+
+if (blockedTable.isBlocked(
+        1234560000000005LL,
+        blockedSearchCounter))
+{
+    std::cout
+        << "Blocked card detected correctly.\n";
+}
+
+OperationCounter allowedSearchCounter;
+
+if (!blockedTable.isBlocked(
+        1234560000000007LL,
+        allowedSearchCounter))
+{
+    std::cout
+        << "Unblocked card allowed correctly.\n";
+}
+
+OperationCounter duplicateBlockCounter;
+
+if (!blockedTable.blockCard(
+        1234560000000005LL,
+        duplicateBlockCounter))
+{
+    std::cout
+        << "Duplicate block rejected correctly.\n";
+}
+
+OperationCounter unblockCounter;
+
+if (blockedTable.unblockCard(
+        1234560000000005LL,
+        unblockCounter))
+{
+    std::cout
+        << "Card unblocked successfully.\n";
+}
+
+std::cout
+    << "Blocked cards remaining: "
+    << blockedTable.getCount()
+    << '\n';
+
+OperationCounter verifyUnblockCounter;
+
+if (!blockedTable.isBlocked(
+        1234560000000005LL,
+        verifyUnblockCounter))
+{
+    std::cout
+        << "Unblock verified correctly.\n";
+}
+
+BlockedCardHashTable copiedBlockedTable =
+    blockedTable;
+
+std::cout
+    << "Copied blocked count: "
+    << copiedBlockedTable.getCount()
+    << '\n';
+
+BlockedCardHashTable assignedBlockedTable;
+
+assignedBlockedTable =
+    blockedTable;
+
+std::cout
+    << "Assigned blocked count: "
+    << assignedBlockedTable.getCount()
     << '\n';
 
     return 0;
