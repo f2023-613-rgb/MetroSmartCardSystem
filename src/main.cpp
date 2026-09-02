@@ -192,6 +192,7 @@ if (argc > 1)
                 char holderName[100];
                 char cnic[20];
                 double balance;
+                char status;
 
                 std::cout
                     << "Enter 16-digit card number: ";
@@ -229,6 +230,11 @@ if (argc > 1)
 
                 std::cin >> balance;
 
+                std::cout
+                    << "Enter status (A = active, B = blocked): ";
+
+                std::cin >> status;
+
                 if (std::cin.fail())
                 {
                     clearInput();
@@ -239,16 +245,35 @@ if (argc > 1)
                     break;
                 }
 
+                bool initiallyBlocked;
+
+if (status == 'A' || status == 'a')
+{
+    initiallyBlocked = false;
+}
+else if (status == 'B' || status == 'b')
+{
+    initiallyBlocked = true;
+}
+else
+{
+    std::cout
+        << "Status must be A or B.\n";
+
+    break;
+}
+
                 auto start =
                     std::chrono::high_resolution_clock::now();
 
                 bool success =
-                    system.registerCard(
-                        cardNumber,
-                        holderName,
-                        cnic,
-                        balance,
-                        counter);
+                     system.registerCard(
+                     cardNumber,
+                     holderName,
+                     cnic,
+                     balance,
+                     counter,
+                     initiallyBlocked);
 
                 auto end =
                     std::chrono::high_resolution_clock::now();

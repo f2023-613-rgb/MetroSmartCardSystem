@@ -20,7 +20,8 @@ bool MetroSystem::registerCard(
     const char* holderName,
     const char* cnic,
     double balance,
-    OperationCounter& counter)
+    OperationCounter& counter,
+    bool initiallyBlocked)
 {
 if (cardNumber < 1000000000000000LL ||
     cardNumber > 9999999999999999LL ||
@@ -38,7 +39,7 @@ if (cardNumber < 1000000000000000LL ||
     newCard.setHolderName(holderName);
     newCard.setCNIC(cnic);
     newCard.setBalance(balance);
-    newCard.setBlocked(false);
+    newCard.setBlocked(initiallyBlocked);
     newCard.setActive(true);
 
     counter.addSteps(6);
@@ -47,6 +48,20 @@ if (cardNumber < 1000000000000000LL ||
     {
         return false;
     }
+
+    if (initiallyBlocked)
+{
+    if (!blockedCards.blockCard(
+            cardNumber,
+            counter))
+    {
+        cards.remove(
+            cardNumber,
+            counter);
+
+        return false;
+    }
+}
 
     transactionLog.append(
         TransactionLog::REGISTER_CARD,

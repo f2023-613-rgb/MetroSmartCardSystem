@@ -106,11 +106,32 @@ bool CommandProcessor::processLine(
         std::string holderName;
         std::string cnic;
         std::string balanceText;
+        std::string statusText;
 
         std::getline(stream, cardText, '|');
         std::getline(stream, holderName, '|');
         std::getline(stream, cnic, '|');
-        std::getline(stream, balanceText);
+        std::getline(stream, balanceText, '|');
+        std::getline(stream, statusText);
+        
+
+        bool initiallyBlocked = false;
+
+if (statusText == "ACTIVE")
+{
+    initiallyBlocked = false;
+}
+else if (statusText == "BLOCKED")
+{
+    initiallyBlocked = true;
+}
+else
+{
+    std::cout
+        << "REGISTER FAILED - invalid status\n";
+
+    return false;
+}
 
         long long cardNumber =
             std::stoll(cardText);
@@ -120,11 +141,12 @@ bool CommandProcessor::processLine(
 
         bool success =
             system.registerCard(
-                cardNumber,
-                holderName.c_str(),
-                cnic.c_str(),
-                balance,
-                counter);
+             cardNumber,
+             holderName.c_str(),
+             cnic.c_str(),
+             balance,
+             counter,
+             initiallyBlocked);
 
         auto end =
             std::chrono::high_resolution_clock::now();

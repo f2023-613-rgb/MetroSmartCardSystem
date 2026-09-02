@@ -32,11 +32,12 @@ public:
     MetroSystem();
 
     bool registerCard(long long cardNumber,
-                      const char* holderName,
-                      const char* cnic,
-                      double balance,
-                      OperationCounter& counter);
-
+                  const char* holderName,
+                  const char* cnic,
+                  double balance,
+                  OperationCounter& counter,
+                  bool initiallyBlocked = false);
+                  
     Card* findCard(long long cardNumber,
                    OperationCounter& counter);
 
