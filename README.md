@@ -1026,6 +1026,3 @@ Fixed 30 stations         -> Array
 Open tap-in               -> Direct fields inside Card
 
 This allows the required operations to satisfy their intended complexity constraints.
-
-
-A few important improvements over your current README are now reflected correctly: your current file still documents the old script invocation `.\metro data\commands.txt`, the old five-field `REGISTER` command, and only mentions 5,000/50,000 cards in the performance section. :contentReference[oaicite:1]{index=1} :contentReference[oaicite:2]{index=2}
