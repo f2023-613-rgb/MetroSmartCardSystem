@@ -4,6 +4,7 @@
 #include "../include/Station.h"
 #include "../include/OperationCounter.h"
 #include "../include/GateQueue.h"
+#include "../include/TopUpStack.h"
 
 int main()
 {
@@ -130,5 +131,87 @@ std::cout << "Assigned queue count: "
           << assignedQueue.getCount()
           << '\n';          
 
+
+std::cout << "\n=== TOP-UP STACK TEST ===\n";
+
+TopUpStack undoStack;
+OperationCounter stackCounter;
+
+undoStack.push(1234560000000001LL, 100.0, stackCounter);
+undoStack.push(1234560000000002LL, 200.0, stackCounter);
+undoStack.push(1234560000000003LL, 300.0, stackCounter);
+
+std::cout << "Transactions stored: "
+          << undoStack.getCount()
+          << '\n';
+
+long long topCard = 0;
+double topAmount = 0.0;
+
+if (undoStack.peek(topCard, topAmount))
+{
+    std::cout << "Latest top-up card: "
+              << topCard
+              << '\n';
+
+    std::cout << "Latest top-up amount: "
+              << topAmount
+              << '\n';
+}
+
+long long undoCard = 0;
+double undoAmount = 0.0;
+
+if (undoStack.pop(undoCard,
+                  undoAmount,
+                  stackCounter))
+{
+    std::cout << "Undo card: "
+              << undoCard
+              << '\n';
+
+    std::cout << "Undo amount: "
+              << undoAmount
+              << '\n';
+}
+
+std::cout << "Transactions remaining: "
+          << undoStack.getCount()
+          << '\n';
+
+std::cout << "Stack steps: "
+          << stackCounter.getSteps()
+          << '\n';
+
+std::cout << "Stack comparisons: "
+          << stackCounter.getComparisons()
+          << '\n';
+
+TopUpStack emptyStack;
+OperationCounter emptyStackCounter;
+
+long long emptyCard = 0;
+double emptyAmount = 0.0;
+
+if (!emptyStack.pop(emptyCard,
+                    emptyAmount,
+                    emptyStackCounter))
+{
+    std::cout << "Empty stack handled correctly.\n";
+}
+
+TopUpStack copiedStack = undoStack;
+
+std::cout << "Copied stack count: "
+          << copiedStack.getCount()
+          << '\n';
+
+TopUpStack assignedStack;
+
+assignedStack = undoStack;
+
+std::cout << "Assigned stack count: "
+          << assignedStack.getCount()
+          << '\n';
     return 0;
 }
