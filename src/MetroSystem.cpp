@@ -122,20 +122,56 @@ bool MetroSystem::undoLastTopUp(
     long long cardNumber = 0;
     double amount = 0.0;
 
-    if (!undoStack.pop(
+    // First inspect the latest top-up without removing it.
+    counter.incrementComparisons();
+
+    if (!undoStack.peek(
             cardNumber,
-            amount,
-            counter))
+            amount))
     {
         return false;
     }
 
+    counter.incrementSteps();
+
+    // Find the card before removing the undo record.
     Card* card =
         cards.search(
             cardNumber,
             counter);
 
+    counter.incrementComparisons();
+
     if (card == nullptr)
+    {
+        return false;
+    }
+
+    // Make sure deducting the original top-up amount is possible.
+    counter.incrementComparisons();
+
+    if (amount > card->getBalance())
+    {
+        return false;
+    }
+
+    // Only now remove the transaction from the stack.
+    long long poppedCardNumber = 0;
+    double poppedAmount = 0.0;
+
+    if (!undoStack.pop(
+            poppedCardNumber,
+            poppedAmount,
+            counter))
+    {
+        return false;
+    }
+
+    // Defensive check: popped data should match what we peeked.
+    counter.incrementComparisons();
+
+    if (poppedCardNumber != cardNumber ||
+        poppedAmount != amount)
     {
         return false;
     }
@@ -144,6 +180,8 @@ bool MetroSystem::undoLastTopUp(
     {
         return false;
     }
+
+    counter.incrementSteps();
 
     transactionLog.append(
         TransactionLog::UNDO_TOP_UP,
