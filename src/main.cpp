@@ -5,6 +5,7 @@
 #include "../include/OperationCounter.h"
 #include "../include/GateQueue.h"
 #include "../include/TopUpStack.h"
+#include "../include/TransactionLog.h"
 
 int main()
 {
@@ -213,5 +214,81 @@ assignedStack = undoStack;
 std::cout << "Assigned stack count: "
           << assignedStack.getCount()
           << '\n';
+
+std::cout
+    << "\n=== TRANSACTION LOG TEST ===\n";
+
+TransactionLog transactionLog;
+OperationCounter logCounter;
+
+transactionLog.append(
+    TransactionLog::REGISTER_CARD,
+    1234560000000001LL,
+    0.0,
+    -1,
+    "08:00",
+    logCounter);
+
+transactionLog.append(
+    TransactionLog::TOP_UP,
+    1234560000000001LL,
+    200.0,
+    -1,
+    "08:05",
+    logCounter);
+
+transactionLog.append(
+    TransactionLog::TAP_IN,
+    1234560000000001LL,
+    0.0,
+    3,
+    "08:15",
+    logCounter);
+
+transactionLog.append(
+    TransactionLog::TAP_OUT,
+    1234560000000001LL,
+    45.0,
+    8,
+    "08:42",
+    logCounter);
+
+std::cout
+    << "Transactions today: "
+    << transactionLog.getCount()
+    << '\n';
+
+std::cout
+    << "\nEnd-of-day replay:\n";
+
+transactionLog.replay();
+
+std::cout
+    << "Log steps: "
+    << logCounter.getSteps()
+    << '\n';
+
+std::cout
+    << "Log comparisons: "
+    << logCounter.getComparisons()
+    << '\n';
+
+TransactionLog copiedLog =
+    transactionLog;
+
+std::cout
+    << "\nCopied log transactions: "
+    << copiedLog.getCount()
+    << '\n';
+
+TransactionLog assignedLog;
+
+assignedLog = transactionLog;
+
+std::cout
+    << "Assigned log transactions: "
+    << assignedLog.getCount()
+    << '\n';
+
     return 0;
 }
