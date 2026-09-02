@@ -76,7 +76,8 @@ const JourneyHistory& Card::getJourneyHistory() const
 
 void Card::setCardNumber(long long number)
 {
-    if (number > 0)
+    if (number >= 1000000000000000LL &&
+        number <= 9999999999999999LL)
     {
         cardNumber = number;
     }

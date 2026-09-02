@@ -104,7 +104,8 @@ bool TransactionLog::append(TransactionType type,
     return true;
 }
 
-void TransactionLog::replay() const
+void TransactionLog::replay(
+    OperationCounter& counter) const
 {
     TransactionNode* current = head;
 
@@ -137,7 +138,7 @@ void TransactionLog::replay() const
         }
 
         std::cout << '\n';
-
+        counter.incrementSteps();
         current = current->next;
     }
 }

@@ -22,11 +22,13 @@ bool MetroSystem::registerCard(
     double balance,
     OperationCounter& counter)
 {
-    if (cardNumber <= 0 || balance < 0.0)
-    {
-        counter.incrementComparisons();
-        return false;
-    }
+if (cardNumber < 1000000000000000LL ||
+    cardNumber > 9999999999999999LL ||
+    balance < 0.0)
+{
+    counter.incrementComparisons();
+    return false;
+}
 
     counter.incrementComparisons();
 
@@ -320,9 +322,10 @@ int MetroSystem::getGateQueueCount() const
     return gateQueue.getCount();
 }
 
-void MetroSystem::replayTransactions() const
+void MetroSystem::replayTransactions(
+    OperationCounter& counter) const
 {
-    transactionLog.replay();
+    transactionLog.replay(counter);
 }
 
 double MetroSystem::calculateFare(

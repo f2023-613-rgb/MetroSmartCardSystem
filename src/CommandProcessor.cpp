@@ -627,15 +627,37 @@ if (command == "UNDO")
     // =========================================================
     // REPLAY
     // =========================================================
-    if (command == "REPLAY")
-    {
-        std::cout
-            << "REPLAY\n";
+   if (command == "REPLAY")
+{
+    std::cout
+        << "REPLAY\n";
 
-        system.replayTransactions();
+    auto replayStart =
+        std::chrono::high_resolution_clock::now();
 
-        return true;
-    }
+    system.replayTransactions(counter);
+
+    auto replayEnd =
+        std::chrono::high_resolution_clock::now();
+
+    long long microseconds =
+        std::chrono::duration_cast<
+            std::chrono::microseconds>(
+                replayEnd - replayStart)
+            .count();
+
+    std::cout
+        << "Replay time: "
+        << microseconds
+        << " us"
+        << " | Steps: "
+        << counter.getSteps()
+        << " | Comparisons: "
+        << counter.getComparisons()
+        << '\n';
+
+    return true;
+}
 
 
     // =========================================================

@@ -59,7 +59,8 @@ public:
                 const char* time,
                 OperationCounter& counter);
 
-    void replay() const;
+void replay(
+    OperationCounter& counter) const;
 
     bool isEmpty() const;
 

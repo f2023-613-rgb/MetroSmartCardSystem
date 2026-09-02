@@ -67,8 +67,9 @@ void showMenu()
         << "12. Move journey previous\n"
         << "13. Move journey next\n"
         << "14. Delete current journey\n"
-        << "15. Replay today's transactions\n"
-        << "16. Save data\n"
+        << "15. Insert journey after current\n"
+        << "16. Replay today's transactions\n"
+        << "17. Save data\n"
         << "0. Exit\n"
         << "=====================================\n"
         << "Enter choice: ";
@@ -1151,38 +1152,155 @@ int main(int argc, char* argv[])
                 break;
             }
 
-
-            // =====================================================
-            // 15. REPLAY DAILY TRANSACTIONS
-            // =====================================================
             case 15:
-            {
-                std::cout
-                    << "\n=== DAILY TRANSACTION REPLAY ===\n";
+{
+    long long cardNumber;
 
-                auto start =
-                    std::chrono::high_resolution_clock::now();
+    int entryStation;
+    int exitStation;
 
-                system.replayTransactions();
+    char entryTime[30];
+    char exitTime[30];
 
-                auto end =
-                    std::chrono::high_resolution_clock::now();
+    double fare;
 
-                std::cout
-                    << "Replay time: "
-                    << getElapsedMicroseconds(
-                        start,
-                        end)
-                    << " microseconds\n";
+    std::cout
+        << "Enter card number: ";
 
-                break;
-            }
+    std::cin >> cardNumber;
+
+    std::cout
+        << "Enter entry station ID (0-29): ";
+
+    std::cin >> entryStation;
+
+    std::cout
+        << "Enter exit station ID (0-29): ";
+
+    std::cin >> exitStation;
+
+    std::cout
+        << "Enter fare: ";
+
+    std::cin >> fare;
+
+    if (std::cin.fail())
+    {
+        clearInput();
+
+        std::cout
+            << "Invalid input.\n";
+
+        break;
+    }
+
+    clearInput();
+
+    std::cout
+        << "Enter entry time: ";
+
+    std::cin.getline(
+        entryTime,
+        sizeof(entryTime));
+
+    std::cout
+        << "Enter exit time: ";
+
+    std::cin.getline(
+        exitTime,
+        sizeof(exitTime));
+
+    Journey journey;
+
+    journey.setEntryStation(
+        entryStation);
+
+    journey.setExitStation(
+        exitStation);
+
+    journey.setEntryTime(
+        entryTime);
+
+    journey.setExitTime(
+        exitTime);
+
+    journey.setFare(
+        fare);
+
+    auto start =
+        std::chrono::high_resolution_clock::now();
+
+    bool success =
+        system.insertJourneyAfterCurrent(
+            cardNumber,
+            journey,
+            counter);
+
+    auto end =
+        std::chrono::high_resolution_clock::now();
+
+    if (success)
+    {
+        std::cout
+            << "Journey inserted after current journey.\n";
+    }
+    else
+    {
+        std::cout
+            << "Journey insertion failed.\n";
+    }
+
+    printOperationStats(
+        counter,
+        getElapsedMicroseconds(
+            start,
+            end));
+
+    break;
+}
 
 
             // =====================================================
-            // 16. SAVE DATA
+            // 16. REPLAY DAILY TRANSACTIONS
             // =====================================================
-            case 16:
+           case 16:
+{
+    std::cout
+        << "\n=== DAILY TRANSACTION REPLAY ===\n";
+
+    auto start =
+        std::chrono::high_resolution_clock::now();
+
+    system.replayTransactions(counter);
+
+    auto end =
+        std::chrono::high_resolution_clock::now();
+
+    std::cout
+        << "Replay time: "
+        << getElapsedMicroseconds(
+            start,
+            end)
+        << " microseconds\n";
+
+    std::cout
+        << "Replay steps: "
+        << counter.getSteps()
+        << '\n';
+
+    std::cout
+        << "Replay comparisons: "
+        << counter.getComparisons()
+        << '\n';
+
+    break;
+}
+
+
+            // =====================================================
+            // 17. SAVE DATA
+            // =====================================================
+            case 17:
             {
                 auto start =
                     std::chrono::high_resolution_clock::now();

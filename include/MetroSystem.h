@@ -72,7 +72,8 @@ public:
 
     int getGateQueueCount() const;
 
-    void replayTransactions() const;
+    void replayTransactions(
+    OperationCounter& counter) const;
 
     bool tapIn(long long cardNumber,
            int stationId,
