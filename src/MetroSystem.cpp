@@ -12,6 +12,69 @@ MetroSystem::MetroSystem()
     for (int i = 0; i < 30; i++)
     {
         stations[i].setStationId(i);
+
+        char code[10];
+        char name[50];
+
+        if (i < 9)
+        {
+            code[0] = 'S';
+            code[1] = 'T';
+            code[2] = '0';
+            code[3] = static_cast<char>('1' + i);
+            code[4] = '\0';
+        }
+        else
+        {
+            int stationNumber = i + 1;
+
+            code[0] = 'S';
+            code[1] = 'T';
+            code[2] =
+                static_cast<char>(
+                    '0' + stationNumber / 10);
+
+            code[3] =
+                static_cast<char>(
+                    '0' + stationNumber % 10);
+
+            code[4] = '\0';
+        }
+
+        name[0] = 'S';
+        name[1] = 't';
+        name[2] = 'a';
+        name[3] = 't';
+        name[4] = 'i';
+        name[5] = 'o';
+        name[6] = 'n';
+        name[7] = ' ';
+
+        int stationNumber = i + 1;
+
+        if (stationNumber < 10)
+        {
+            name[8] =
+                static_cast<char>(
+                    '0' + stationNumber);
+
+            name[9] = '\0';
+        }
+        else
+        {
+            name[8] =
+                static_cast<char>(
+                    '0' + stationNumber / 10);
+
+            name[9] =
+                static_cast<char>(
+                    '0' + stationNumber % 10);
+
+            name[10] = '\0';
+        }
+
+        stations[i].setStationCode(code);
+        stations[i].setStationName(name);
     }
 }
 

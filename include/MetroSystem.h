@@ -37,7 +37,7 @@ public:
                   double balance,
                   OperationCounter& counter,
                   bool initiallyBlocked = false);
-                  
+
     Card* findCard(long long cardNumber,
                    OperationCounter& counter);
 
@@ -124,6 +124,21 @@ bool loadJourneys(const char* filename);
 bool saveCards(const char* filename) const;
 
 bool saveJourneys(const char* filename) const;
+
+const Station* getStation(
+    int stationId) const;
+
+const Station* MetroSystem::getStation(
+    int stationId) const
+{
+    if (stationId < 0 ||
+        stationId >= 30)
+    {
+        return nullptr;
+    }
+
+    return &stations[stationId];
+}
 };
 
 #endif
