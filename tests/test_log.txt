@@ -1,0 +1,23 @@
+=====================================
+ METRO SYSTEM FINAL FUNCTIONAL TEST
+=====================================
+[PASS] Register valid card
+[PASS] Reject duplicate card
+[PASS] Reject invalid card number
+[PASS] Find existing card
+[PASS] Top-up card
+[PASS] Undo top-up
+[PASS] Tap in
+[PASS] Reject duplicate tap-in
+[PASS] Reject blocked tap-out
+[PASS] Unblock and tap-out with correct fare
+[PASS] Journey stored in history
+[PASS] Gate queue FIFO
+[PASS] Empty undo stack handled
+[PASS] Empty gate queue handled
+
+=====================================
+Passed: 14
+Failed: 0
+=====================================
+ALL FUNCTIONAL TESTS PASSED

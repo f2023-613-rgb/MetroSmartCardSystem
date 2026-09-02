@@ -46,3 +46,21 @@ performance:
 	src/OperationCounter.cpp \
 	src/CardHashTable.cpp \
 	-o performance_test
+
+test:
+	$(CXX) $(CXXFLAGS) \
+	tests/system_test.cpp \
+	src/Card.cpp \
+	src/Journey.cpp \
+	src/Station.cpp \
+	src/OperationCounter.cpp \
+	src/GateQueue.cpp \
+	src/TopUpStack.cpp \
+	src/TransactionLog.cpp \
+	src/JourneyHistory.cpp \
+	src/CardHashTable.cpp \
+	src/BlockedCardHashTable.cpp \
+	src/MetroSystem.cpp \
+	-o system_test
+	./system_test
+

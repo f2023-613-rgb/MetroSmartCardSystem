@@ -23,3 +23,5 @@ memory_test
 memory_test.exe
 metro_asan
 metro_asan.exe
+system_test
+system_test.exe
