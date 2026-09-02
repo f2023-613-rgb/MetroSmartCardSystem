@@ -1,6 +1,7 @@
 #include <iostream>
 #include "../include/Card.h"
 #include "../include/Journey.h"
+#include "../include/Station.h"
 
 int main()
 {
@@ -19,6 +20,12 @@ int main()
     journey.setExitTime("08:42");
     journey.setFare(45.0);
 
+    Station station;
+
+    station.setStationId(3);
+    station.setStationCode("ST03");
+    station.setStationName("Central Station");
+
     std::cout << "=== CARD ===\n";
     std::cout << "Card Number: " << card.getCardNumber() << '\n';
     std::cout << "Holder Name: " << card.getHolderName() << '\n';
@@ -30,6 +37,11 @@ int main()
     std::cout << "Entry Time: " << journey.getEntryTime() << '\n';
     std::cout << "Exit Time: " << journey.getExitTime() << '\n';
     std::cout << "Fare: " << journey.getFare() << '\n';
+
+    std::cout << "\n=== STATION ===\n";
+    std::cout << "Station ID: " << station.getStationId() << '\n';
+    std::cout << "Station Code: " << station.getStationCode() << '\n';
+    std::cout << "Station Name: " << station.getStationName() << '\n';
 
     return 0;
 }
