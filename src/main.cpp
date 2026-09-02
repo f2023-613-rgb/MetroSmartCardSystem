@@ -6,7 +6,7 @@
 #include "../include/GateQueue.h"
 #include "../include/TopUpStack.h"
 #include "../include/TransactionLog.h"
-
+#include "../include/JourneyHistory.h"
 int main()
 {
     Card card;
@@ -289,6 +289,134 @@ std::cout
     << "Assigned log transactions: "
     << assignedLog.getCount()
     << '\n';
+
+std::cout << "\n=== JOURNEY HISTORY TEST ===\n";
+
+JourneyHistory history;
+OperationCounter historyCounter;
+
+Journey j1;
+j1.setEntryStation(1);
+j1.setExitStation(4);
+j1.setEntryTime("09:00");
+j1.setExitTime("09:20");
+j1.setFare(30.0);
+
+Journey j2;
+j2.setEntryStation(4);
+j2.setExitStation(7);
+j2.setEntryTime("10:00");
+j2.setExitTime("10:25");
+j2.setFare(35.0);
+
+Journey j3;
+j3.setEntryStation(7);
+j3.setExitStation(10);
+j3.setEntryTime("11:00");
+j3.setExitTime("11:30");
+j3.setFare(40.0);
+
+history.addJourney(j1, historyCounter);
+history.addJourney(j2, historyCounter);
+history.addJourney(j3, historyCounter);
+
+std::cout << "Journey count: "
+          << history.getCount()
+          << '\n';
+
+Journey currentJourney;
+
+if (history.getCurrentJourney(currentJourney))
+{
+    std::cout << "Current journey fare: "
+              << currentJourney.getFare()
+              << '\n';
+}
+
+if (history.movePrevious(historyCounter))
+{
+    history.getCurrentJourney(currentJourney);
+
+    std::cout << "After moving previous, fare: "
+              << currentJourney.getFare()
+              << '\n';
+}
+
+Journey middleJourney;
+middleJourney.setEntryStation(5);
+middleJourney.setExitStation(6);
+middleJourney.setEntryTime("10:10");
+middleJourney.setExitTime("10:15");
+middleJourney.setFare(15.0);
+
+history.insertAfterCurrent(
+    middleJourney,
+    historyCounter);
+
+history.getCurrentJourney(currentJourney);
+
+std::cout << "Inserted journey fare: "
+          << currentJourney.getFare()
+          << '\n';
+
+std::cout << "Journey count after insert: "
+          << history.getCount()
+          << '\n';
+
+history.deleteCurrent(historyCounter);
+
+std::cout << "Journey count after delete: "
+          << history.getCount()
+          << '\n';
+
+if (history.getCurrentJourney(currentJourney))
+{
+    std::cout << "Current fare after delete: "
+              << currentJourney.getFare()
+              << '\n';
+}
+
+std::cout << "History steps: "
+          << historyCounter.getSteps()
+          << '\n';
+
+std::cout << "History comparisons: "
+          << historyCounter.getComparisons()
+          << '\n';
+
+JourneyHistory limitHistory;
+OperationCounter limitCounter;
+
+for (int i = 0; i < 25; i++)
+{
+    Journey testJourney;
+
+    testJourney.setEntryStation(i % 30);
+    testJourney.setExitStation((i + 1) % 30);
+    testJourney.setFare(10.0 + i);
+
+    limitHistory.addJourney(
+        testJourney,
+        limitCounter);
+}
+
+std::cout << "History after adding 25 journeys: "
+          << limitHistory.getCount()
+          << '\n';
+
+JourneyHistory copiedHistory = history;
+
+std::cout << "Copied history count: "
+          << copiedHistory.getCount()
+          << '\n';
+
+JourneyHistory assignedHistory;
+
+assignedHistory = history;
+
+std::cout << "Assigned history count: "
+          << assignedHistory.getCount()
+          << '\n';
 
     return 0;
 }
