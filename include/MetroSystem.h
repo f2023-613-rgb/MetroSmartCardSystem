@@ -45,7 +45,12 @@ public:
                    const char* time,
                    OperationCounter& counter);
 
-    bool undoLastTopUp(OperationCounter& counter);
+    bool undoLastTopUp(
+        OperationCounter& counter);
+
+    int undoLastNTopUps(
+        int n,
+        OperationCounter& counter);
 
     bool blockCard(long long cardNumber,
                    const char* time,

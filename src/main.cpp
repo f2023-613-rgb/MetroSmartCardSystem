@@ -56,7 +56,7 @@ void showMenu()
         << "1. Register card\n"
         << "2. Find/show card\n"
         << "3. Top up card\n"
-        << "4. Undo last top-up\n"
+        << "4. Undo last N top-ups\n"
         << "5. Block card\n"
         << "6. Unblock card\n"
         << "7. Tap in\n"
@@ -449,38 +449,64 @@ int main(int argc, char* argv[])
             // 4. UNDO LAST TOP-UP
             // =====================================================
             case 4:
-            {
-                auto start =
-                    std::chrono::high_resolution_clock::now();
+{
+    int n;
 
-                bool success =
-                    system.undoLastTopUp(
-                        counter);
+    std::cout
+        << "How many recent top-ups do you want to undo? ";
 
-                auto end =
-                    std::chrono::high_resolution_clock::now();
+    std::cin >> n;
 
-                if (success)
-                {
-                    std::cout
-                        << "Last top-up undone successfully.\n";
-                }
-                else
-                {
-                    std::cout
-                        << "No top-up could be undone.\n";
-                }
+    if (std::cin.fail())
+    {
+        clearInput();
 
-                printOperationStats(
-                    counter,
-                    getElapsedMicroseconds(
-                        start,
-                        end));
+        std::cout
+            << "Invalid number.\n";
 
-                break;
-            }
+        break;
+    }
 
+    auto start =
+        std::chrono::high_resolution_clock::now();
 
+    int undone =
+        system.undoLastNTopUps(
+            n,
+            counter);
+
+    auto end =
+        std::chrono::high_resolution_clock::now();
+
+    if (undone > 0)
+    {
+        std::cout
+            << "Top-ups undone: "
+            << undone
+            << '\n';
+
+        if (undone < n)
+        {
+            std::cout
+                << "Only "
+                << undone
+                << " top-up transaction(s) were available.\n";
+        }
+    }
+    else
+    {
+        std::cout
+            << "No top-up transactions could be undone.\n";
+    }
+
+    printOperationStats(
+        counter,
+        getElapsedMicroseconds(
+            start,
+            end));
+
+    break;
+}
             // =====================================================
             // 5. BLOCK CARD
             // =====================================================

@@ -154,6 +154,34 @@ bool MetroSystem::undoLastTopUp(
     return true;
 }
 
+int MetroSystem::undoLastNTopUps(
+    int n,
+    OperationCounter& counter)
+{
+    counter.incrementComparisons();
+
+    if (n <= 0)
+    {
+        return 0;
+    }
+
+    int undoneCount = 0;
+
+    for (int i = 0; i < n; i++)
+    {
+        counter.incrementSteps();
+
+        if (!undoLastTopUp(counter))
+        {
+            break;
+        }
+
+        undoneCount++;
+    }
+
+    return undoneCount;
+}
+
 bool MetroSystem::blockCard(
     long long cardNumber,
     const char* time,

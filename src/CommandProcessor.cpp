@@ -260,41 +260,68 @@ bool CommandProcessor::processLine(
     }
 
 
-    // =========================================================
-    // UNDO
-    // =========================================================
-    if (command == "UNDO")
+ // =========================================================
+// UNDO
+// Format: UNDO|N
+// =========================================================
+if (command == "UNDO")
+{
+    std::string countText;
+
+    std::getline(
+        stream,
+        countText);
+
+    int n = 1;
+
+    if (!countText.empty())
     {
-        bool success =
-            system.undoLastTopUp(
-                counter);
-
-        auto end =
-            std::chrono::high_resolution_clock::now();
-
-        long long microseconds =
-            std::chrono::duration_cast<
-                std::chrono::microseconds>(
-                    end - start)
-                .count();
-
-        std::cout
-            << (success
-                    ? "UNDO OK"
-                    : "UNDO FAILED")
-            << " | Time: "
-            << microseconds
-            << " us"
-            << " | Steps: "
-            << counter.getSteps()
-            << " | Comparisons: "
-            << counter.getComparisons()
-            << '\n';
-
-        return success;
+        n = std::stoi(countText);
     }
 
+    int undone =
+        system.undoLastNTopUps(
+            n,
+            counter);
 
+    auto end =
+        std::chrono::high_resolution_clock::now();
+
+    long long microseconds =
+        std::chrono::duration_cast<
+            std::chrono::microseconds>(
+                end - start)
+            .count();
+
+    if (undone > 0)
+    {
+        std::cout
+            << "UNDO "
+            << undone
+            << "/"
+            << n
+            << " OK";
+    }
+    else
+    {
+        std::cout
+            << "UNDO 0/"
+            << n
+            << " FAILED";
+    }
+
+    std::cout
+        << " | Time: "
+        << microseconds
+        << " us"
+        << " | Steps: "
+        << counter.getSteps()
+        << " | Comparisons: "
+        << counter.getComparisons()
+        << '\n';
+
+    return undone > 0;
+}
     // =========================================================
     // BLOCK
     // =========================================================
