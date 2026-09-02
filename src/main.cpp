@@ -3,6 +3,7 @@
 #include "../include/Journey.h"
 #include "../include/Station.h"
 #include "../include/OperationCounter.h"
+#include "../include/GateQueue.h"
 
 int main()
 {
@@ -54,6 +55,80 @@ int main()
     std::cout << "\n=== COUNTER TEST ===\n";
     std::cout << "Steps: " << counter.getSteps() << '\n';
     std::cout << "Comparisons: " << counter.getComparisons() << '\n';
+
+    std::cout << "\n=== GATE QUEUE TEST ===\n";
+
+GateQueue gateQueue;
+OperationCounter queueCounter;
+
+gateQueue.enqueue(1234560000000001LL, queueCounter);
+gateQueue.enqueue(1234560000000002LL, queueCounter);
+gateQueue.enqueue(1234560000000003LL, queueCounter);
+
+std::cout << "Passengers waiting: "
+          << gateQueue.getCount()
+          << '\n';
+
+long long frontCard = 0;
+
+if (gateQueue.peek(frontCard))
+{
+    std::cout << "Front card: "
+              << frontCard
+              << '\n';
+}
+
+long long removedCard = 0;
+
+if (gateQueue.dequeue(removedCard, queueCounter))
+{
+    std::cout << "Served card: "
+              << removedCard
+              << '\n';
+}
+
+if (gateQueue.peek(frontCard))
+{
+    std::cout << "New front card: "
+              << frontCard
+              << '\n';
+}
+
+std::cout << "Passengers remaining: "
+          << gateQueue.getCount()
+          << '\n';
+
+std::cout << "Queue steps: "
+          << queueCounter.getSteps()
+          << '\n';
+
+std::cout << "Queue comparisons: "
+          << queueCounter.getComparisons()
+          << '\n';
+
+GateQueue emptyQueue;
+OperationCounter emptyCounter;
+
+long long emptyRemoved = 0;
+
+if (!emptyQueue.dequeue(emptyRemoved, emptyCounter))
+{
+    std::cout << "Empty queue handled correctly.\n";
+}
+
+GateQueue copiedQueue = gateQueue;
+
+std::cout << "Copied queue count: "
+          << copiedQueue.getCount()
+          << '\n';
+
+GateQueue assignedQueue;
+
+assignedQueue = gateQueue;
+
+std::cout << "Assigned queue count: "
+          << assignedQueue.getCount()
+          << '\n';          
 
     return 0;
 }
