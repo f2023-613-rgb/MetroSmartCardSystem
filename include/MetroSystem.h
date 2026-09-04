@@ -127,18 +127,7 @@ bool saveJourneys(const char* filename) const;
 
 const Station* getStation(
     int stationId) const;
-
-const Station* MetroSystem::getStation(
-    int stationId) const
-{
-    if (stationId < 0 ||
-        stationId >= 30)
-    {
-        return nullptr;
-    }
-
-    return &stations[stationId];
-}
+    
 };
 
 #endif

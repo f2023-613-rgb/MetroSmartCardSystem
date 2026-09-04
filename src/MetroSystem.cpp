@@ -1012,3 +1012,15 @@ bool MetroSystem::loadJourneys(
 
     return true;
 }
+
+const Station* MetroSystem::getStation(
+    int stationId) const
+{
+    if (stationId < 0 ||
+        stationId >= 30)
+    {
+        return nullptr;
+    }
+
+    return &stations[stationId];
+}
